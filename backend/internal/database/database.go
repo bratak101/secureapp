@@ -11,21 +11,36 @@ import (
 // DB globalna pula połączeń (Prepared Statements używają jej wewnętrznie).
 var DB *sql.DB
 
-// DSN domyślny DSN dla XAMPP (localhost:3306).
+// DSN – obsługuje DB_* oraz Railway (MYSQLHOST, MYSQLPORT, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE).
 func dsn() string {
 	user := os.Getenv("DB_USER")
+	if user == "" {
+		user = os.Getenv("MYSQLUSER")
+	}
 	if user == "" {
 		user = "root"
 	}
 	pass := os.Getenv("DB_PASS")
 	if pass == "" {
-		pass = ""
+		pass = os.Getenv("MYSQLPASSWORD")
 	}
 	host := os.Getenv("DB_HOST")
+	if host == "" {
+		h := os.Getenv("MYSQLHOST")
+		p := os.Getenv("MYSQLPORT")
+		if h != "" && p != "" {
+			host = h + ":" + p
+		} else if h != "" {
+			host = h + ":3306"
+		}
+	}
 	if host == "" {
 		host = "127.0.0.1:3306"
 	}
 	dbname := os.Getenv("DB_NAME")
+	if dbname == "" {
+		dbname = os.Getenv("MYSQLDATABASE")
+	}
 	if dbname == "" {
 		dbname = "secure_app"
 	}
