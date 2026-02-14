@@ -45,17 +45,15 @@ git push -u origin main
 
 ### Backend (Render)
 
-1. [render.com](https://render.com) → **New** → **Web Service**.
-2. Połącz GitHub i wybierz repozytorium.
-3. **Root Directory**: `backend`
-4. **Build**: `go build -o server .`
-5. **Start**: `./server`
-6. **Environment**:
-   - `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME` – dane z PlanetScale/Railway
-   - `JWT_SECRET` – długi losowy string
-   - `RECAPTCHA_SECRET_KEY` – klucz prywatny reCAPTCHA (jeśli używasz)
-   - `PORT` – Render ustawia sam (np. 10000)
-7. Zapisz – Render zbuduje i uruchomi backend. Skopiuj URL serwisu (np. `https://secure-app-xxx.onrender.com`).
+Szczegółowa instrukcja (w tym baza na Railway): **docs/RENDER_BACKEND.md**.
+
+W skrócie:
+1. [render.com](https://render.com) → **New** → **Web Service** → połącz repo.
+2. **Root Directory**: `backend`
+3. **Build Command**: `go build -o server .`
+4. **Start Command**: `./server`
+5. **Environment**: `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE` (dane z Railway – **publiczny** host i port), `RECAPTCHA_SECRET_KEY`. `PORT` ustawia Render.
+6. Zapisz – Render zbuduje i uruchomi backend. Skopiuj URL (np. `https://secure-app-xxx.onrender.com`) i ustaw w Vercel jako `VITE_API_URL`.
 
 ### Baza (PlanetScale)
 

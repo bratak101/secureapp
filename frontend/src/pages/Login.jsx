@@ -13,6 +13,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [backendOk, setBackendOk] = useState(null)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -20,7 +21,7 @@ export default function Login() {
     setLoading(true)
     try {
       const data = await api.login(email, password, recaptchaToken)
-      setToken(data.token, { user_id: data.user_id, username: data.username })
+      setToken(data.token, { user_id: data.user_id, username: data.username, role: data.role })
       setSuccess(true)
       setTimeout(() => navigate('/'), 600)
     } catch (err) {
@@ -37,6 +38,27 @@ export default function Login() {
           <h1 className="text-2xl font-semibold text-white mb-1">Zaloguj się</h1>
           <p className="text-slate-400 text-sm mb-6">Wprowadź dane do konta</p>
 
+          {backendOk === false && (
+            <div className="mb-4 p-3 rounded-lg bg-amber-500/15 text-amber-400 text-sm border border-amber-500/30">
+              Backend niedostępny. Sprawdź zmienną VITE_API_URL (URL backendu) i Redeploy frontendu.
+            </div>
+          )}
+          {backendOk === true && (
+            <div className="mb-4 p-3 rounded-lg bg-emerald-500/15 text-emerald-400 text-sm border border-emerald-500/30">
+              Połączenie z backendem OK.
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={async () => {
+              setBackendOk(null)
+              const ok = await api.checkHealth()
+              setBackendOk(ok)
+            }}
+            className="mb-4 text-sm text-slate-400 hover:text-slate-300 underline"
+          >
+            Sprawdź połączenie z backendem
+          </button>
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-500/15 text-red-400 text-sm border border-red-500/30">
               {error}
@@ -94,11 +116,10 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-slate-400 text-sm">
-            Nie masz konta?{' '}
-            <Link to="/register" className="text-brand-400 hover:text-brand-300 font-medium">
-              Zarejestruj się
-            </Link>
+          <p className="mt-6 text-center text-slate-400 text-sm space-x-2">
+            <Link to="/forgot-password" className="text-brand-400 hover:text-brand-300">Zapomniałeś hasła?</Link>
+            <span>·</span>
+            <Link to="/register" className="text-brand-400 hover:text-brand-300 font-medium">Zarejestruj się</Link>
           </p>
         </div>
       </div>

@@ -1,0 +1,12 @@
+Secure App – instrukcja obsługi
+================================
+
+1. Zaloguj się na stronie głównej (Logowanie).
+2. Po zalogowaniu masz dostęp do:
+   - Strony głównej (landing),
+   - Sekcji Pobierz (pliki do pobrania),
+   - Moje konto (dane konta, wylogowanie).
+
+3. Wylogowanie: przycisk Wyloguj w menu lub w Moje konto.
+
+— Secure App

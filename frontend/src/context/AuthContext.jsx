@@ -20,10 +20,11 @@ export function AuthProvider({ children }) {
 
   const setToken = useCallback((newToken, newUser) => {
     if (newToken && newUser) {
+      const user = { ...newUser, role: newUser.role || 'user' }
       localStorage.setItem(TOKEN_KEY, newToken)
-      localStorage.setItem(USER_KEY, JSON.stringify(newUser))
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
       setTokenState(newToken)
-      setUser(newUser)
+      setUser(user)
     } else {
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(USER_KEY)

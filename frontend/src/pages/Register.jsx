@@ -27,7 +27,7 @@ export default function Register() {
     setLoading(true)
     try {
       const data = await api.register(username, email, password, recaptchaToken)
-      setToken(data.token, { user_id: data.user_id, username: data.username })
+      setToken(data.token, { user_id: data.user_id, username: data.username, role: data.role || 'user' })
       setSuccess(true)
       setTimeout(() => navigate('/'), 600)
     } catch (err) {

@@ -17,12 +17,15 @@ CREATE DATABASE IF NOT EXISTS secure_app
 
 -- ---------- BLOK 2: Tabela users (najpierw wybierz bazę "secure_app" w lewym panelu) ----------
 CREATE TABLE IF NOT EXISTS users (
-  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  username      VARCHAR(64)  NOT NULL,
-  email         VARCHAR(255) NOT NULL,
-  password_hash VARCHAR(64)  NOT NULL COMMENT 'SHA-256(salt+password) hex',
-  salt          VARCHAR(64)  NOT NULL COMMENT 'Unikalna sól w hex',
-  created_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id                         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  username                   VARCHAR(64)  NOT NULL,
+  email                      VARCHAR(255) NOT NULL,
+  password_hash              VARCHAR(64)  NOT NULL COMMENT 'SHA-256(salt+password) hex',
+  salt                       VARCHAR(64)  NOT NULL COMMENT 'Unikalna sól w hex',
+  role                       VARCHAR(20)  NOT NULL DEFAULT 'user',
+  created_at                 TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  password_reset_code        VARCHAR(10)  NULL     DEFAULT NULL,
+  password_reset_expires_at  TIMESTAMP    NULL     DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY uk_username (username),
   UNIQUE KEY uk_email (email),
