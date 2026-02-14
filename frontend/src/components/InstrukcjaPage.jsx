@@ -23,10 +23,10 @@ export default function InstrukcjaPage() {
   const files = getDownloadsForSlug(slug)
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-white mb-1">{data.title}</h1>
-      <p className="text-slate-400 text-sm mb-8">{data.subtitle}</p>
-      <article className="instrukcja-content text-slate-300 text-sm leading-relaxed">
+    <div className="max-w-3xl mx-auto px-4 py-10 animate-fade-in-up">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{data.title}</h1>
+      <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">{data.subtitle}</p>
+      <article className="instrukcja-content text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
         {(() => {
           const lines = data.content.split('\n')
           const out = []
@@ -36,7 +36,7 @@ export default function InstrukcjaPage() {
             const line = lines[i]
             if (line.trim() === '```' || line.trim().startsWith('```')) {
               if (inCode) {
-                out.push(<pre key={out.length} className="my-3 rounded-lg bg-slate-800/80 border border-slate-700 p-3 font-mono text-xs overflow-x-auto">{codeBuf.join('\n')}</pre>)
+                out.push(<pre key={out.length} className="my-3 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 font-mono text-xs overflow-x-auto">{codeBuf.join('\n')}</pre>)
                 codeBuf = []
               }
               inCode = !inCode
@@ -47,9 +47,9 @@ export default function InstrukcjaPage() {
               continue
             }
             if (line.startsWith('## ')) {
-              out.push(<h2 key={out.length} className="text-lg font-semibold text-white mt-8 mb-2 first:mt-0">{line.slice(3)}</h2>)
+              out.push(<h2 key={out.length} className="text-lg font-semibold text-slate-900 dark:text-white mt-8 mb-2 first:mt-0">{line.slice(3)}</h2>)
             } else if (line.startsWith('### ')) {
-              out.push(<h3 key={out.length} className="text-base font-medium text-white mt-4 mb-1">{line.slice(4)}</h3>)
+              out.push(<h3 key={out.length} className="text-base font-medium text-slate-900 dark:text-white mt-4 mb-1">{line.slice(4)}</h3>)
             } else if (line.startsWith('- ')) {
               out.push(<li key={out.length} className="ml-4 list-disc my-0.5">{line.slice(2)}</li>)
             } else if (line.trim() === '') {
@@ -59,15 +59,15 @@ export default function InstrukcjaPage() {
             }
           }
           if (codeBuf.length) {
-            out.push(<pre key={out.length} className="my-3 rounded-lg bg-slate-800/80 border border-slate-700 p-3 font-mono text-xs overflow-x-auto">{codeBuf.join('\n')}</pre>)
+            out.push(<pre key={out.length} className="my-3 rounded-lg bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 p-3 font-mono text-xs overflow-x-auto">{codeBuf.join('\n')}</pre>)
           }
           return out
         })()}
       </article>
 
       {files.length > 0 && (
-        <section className="mt-12 pt-8 border-t border-slate-700/60">
-          <h2 className="text-xl font-semibold text-white mb-4">Pliki do pobrania</h2>
+        <section className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-700/60">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-4">Pliki do pobrania</h2>
           <p className="text-slate-500 text-sm mb-4">Obrazy i pliki do tej instrukcji.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             {files.map((file) => (
@@ -77,10 +77,10 @@ export default function InstrukcjaPage() {
                 download
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block rounded-xl border border-slate-700/60 bg-slate-800/50 hover:bg-slate-800 hover:border-slate-600 transition-colors overflow-hidden group"
+                className="block rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-all duration-300 overflow-hidden group hover:shadow-xl hover:-translate-y-1"
               >
                 {file.type === 'image' ? (
-                  <div className="aspect-video bg-slate-800 flex items-center justify-center relative">
+                  <div className="aspect-video bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative">
                     <img
                       src={file.url}
                       alt=""
@@ -91,7 +91,7 @@ export default function InstrukcjaPage() {
                   </div>
                 ) : null}
                 <div className="p-3">
-                  <span className="font-medium text-white group-hover:text-brand-400">{file.name}</span>
+                  <span className="font-medium text-slate-900 dark:text-white group-hover:text-brand-500 dark:group-hover:text-brand-400">{file.name}</span>
                   {file.description && <p className="text-sm text-slate-500 mt-0.5">{file.description}</p>}
                   {file.size && file.size !== '—' && <p className="text-xs text-slate-600 mt-1">{file.size}</p>}
                 </div>

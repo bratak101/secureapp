@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
+import { useToast } from '../context/useToast'
 import * as api from '../api/client'
 import { APP_VERSION } from '../config/version'
 import Skeleton from '../components/Skeleton'
 
 export default function Konto() {
   const { isAuthenticated, user, logout } = useAuth()
+  const toast = useToast()
   const [me, setMe] = useState(null)
   const [meLoading, setMeLoading] = useState(true)
   const [changePwOpen, setChangePwOpen] = useState(false)
@@ -52,22 +54,25 @@ export default function Konto() {
       setNewPw('')
       setConfirmPw('')
       setChangePwOpen(false)
+      toast.success('Hasło zmienione')
     } catch (err) {
-      setChangePwError(err.message || 'Nie udało się zmienić hasła')
+      const msg = err.message || 'Nie udało się zmienić hasła'
+      setChangePwError(msg)
+      toast.error(msg)
     } finally {
       setChangePwLoading(false)
     }
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold text-white mb-2">Moje konto</h1>
+    <div className="max-w-xl mx-auto px-4 py-12 animate-fade-in-up">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Moje konto</h1>
 
-      <div className="rounded-xl border border-slate-700/60 bg-slate-800/50 overflow-hidden">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5">
         <dl className="divide-y divide-slate-700/60">
           <div className="px-5 py-4 flex justify-between items-center gap-4">
             <dt className="text-sm text-slate-500">Nazwa użytkownika</dt>
-            <dd className="text-white font-medium">{user.username}</dd>
+            <dd className="text-slate-900 dark:text-white font-medium">{user.username}</dd>
           </div>
           {meLoading && !me ? (
             <div className="px-5 py-4 flex justify-between items-center gap-4">
@@ -96,13 +101,13 @@ export default function Konto() {
           <button
             type="button"
             onClick={() => setChangePwOpen(!changePwOpen)}
-            className="px-5 py-2.5 rounded-lg font-medium text-slate-200 bg-slate-700 hover:bg-slate-600"
+            className="px-5 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-200 active:scale-[0.98]"
           >
             {changePwOpen ? 'Anuluj' : 'Zmień hasło'}
           </button>
         </div>
         {changePwOpen && (
-          <form onSubmit={handleChangePassword} className="p-4 rounded-xl border border-slate-700/60 bg-slate-800/30 space-y-3">
+          <form onSubmit={handleChangePassword} className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/30 space-y-3">
             {changePwError && <p className="text-red-400 text-sm">{changePwError}</p>}
             {changePwSuccess && <p className="text-emerald-400 text-sm">Hasło zmienione.</p>}
             <input
@@ -137,7 +142,7 @@ export default function Konto() {
         )}
         <button
           onClick={logout}
-          className="block px-5 py-2.5 rounded-lg font-medium text-slate-200 bg-slate-700 hover:bg-slate-600"
+          className="block px-5 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-200 active:scale-[0.98]"
         >
           Wyloguj się
         </button>

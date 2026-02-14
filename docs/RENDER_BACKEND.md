@@ -69,23 +69,6 @@ MYSQLDATABASE=railway
 |-----|--------|
 | `RECAPTCHA_SECRET_KEY` | Secret Key z [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin) (ten sam klucz, przy którym masz domeny Vercel) |
 
-### SendGrid (opcjonalnie – reset hasła)
-
-Aby reset hasła wysyłał e-mail z kodem (zamiast tylko logować go w konsoli):
-
-| Key | Wartość |
-|-----|--------|
-| `SENDGRID_API_KEY` | API Key z [SendGrid](https://app.sendgrid.com/settings/api_keys) (np. utworzony klucz „secureapp”) |
-| `MAIL_FROM` | Adres nadawcy, np. `noreply@twoja-domena.com` (musi być zweryfikowany w SendGrid) |
-| `MAIL_APP_NAME` | (opcjonalnie) Nazwa w temacie e-maila, domyślnie „Secure App” |
-
-**Lokalnie:** utwórz plik `backend/.sendgrid.env` z:
-```bash
-export SENDGRID_API_KEY='twoj-klucz'
-export MAIL_FROM='noreply@example.com'
-```
-i uruchom `source ./.sendgrid.env` przed `./server` (na Windows: ustaw zmienne w PowerShell/CMD).
-
 ---
 
 ## 4. Zapisz i deploy

@@ -24,8 +24,6 @@ CREATE TABLE IF NOT EXISTS users (
   salt                       VARCHAR(64)  NOT NULL COMMENT 'Unikalna sól w hex',
   role                       VARCHAR(20)  NOT NULL DEFAULT 'user',
   created_at                 TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  password_reset_code        VARCHAR(10)  NULL     DEFAULT NULL,
-  password_reset_expires_at  TIMESTAMP    NULL     DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY uk_username (username),
   UNIQUE KEY uk_email (email),

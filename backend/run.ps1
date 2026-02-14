@@ -9,7 +9,7 @@ if (Test-Path .env.local) {
     }
     Write-Host "Zmienne zaladowane z .env.local" -ForegroundColor Green
 } else {
-    Write-Host "Brak .env.local - skopiuj .env.local.example i uzupelnij SENDGRID_API_KEY, MAIL_FROM" -ForegroundColor Yellow
+    Write-Host "Brak .env.local - skopiuj .env.local.example i uzupelnij zmienne (np. MySQL)" -ForegroundColor Yellow
 }
 
 go run .

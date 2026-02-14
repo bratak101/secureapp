@@ -12,7 +12,6 @@ frontend/dist/
 .env.local
 .env.*.local
 backend/.env.local
-.sendgrid.env
 *.pem
 
 # IDE / OS

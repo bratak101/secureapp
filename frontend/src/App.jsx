@@ -1,30 +1,42 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { ToastProvider } from './context/ToastContext'
 import Layout from './components/Layout'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import ForgotPassword from './pages/ForgotPassword'
-import ResetPassword from './pages/ResetPassword'
-import Konto from './pages/Konto'
-import Admin from './pages/Admin'
-import InstrukcjaPage from './components/InstrukcjaPage'
+import GuestRoute from './components/GuestRoute'
+import ErrorBoundary from './components/ErrorBoundary'
+import PageLoader from './components/PageLoader'
+import ToastContainer from './components/ToastContainer'
+
+const Home = lazy(() => import('./pages/Home'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const Konto = lazy(() => import('./pages/Konto'))
+const Admin = lazy(() => import('./pages/Admin'))
+const InstrukcjaPage = lazy(() => import('./components/InstrukcjaPage'))
+
+function LazyRoute({ children }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>
+}
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout><Home /></Layout>} />
-          <Route path="/login" element={<Layout><Login /></Layout>} />
-          <Route path="/register" element={<Layout><Register /></Layout>} />
-          <Route path="/forgot-password" element={<Layout><ForgotPassword /></Layout>} />
-          <Route path="/reset-password" element={<Layout><ResetPassword /></Layout>} />
-          <Route path="/admin" element={<Layout><Admin /></Layout>} />
-          <Route path="/:slug" element={<Layout><InstrukcjaPage /></Layout>} />
-          <Route path="/konto" element={<Layout><Konto /></Layout>} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Layout><LazyRoute><Home /></LazyRoute></Layout>} />
+              <Route path="/login" element={<Layout><GuestRoute><LazyRoute><Login /></LazyRoute></GuestRoute></Layout>} />
+              <Route path="/register" element={<Layout><GuestRoute><LazyRoute><Register /></LazyRoute></GuestRoute></Layout>} />
+              <Route path="/admin" element={<Layout><LazyRoute><Admin /></LazyRoute></Layout>} />
+              <Route path="/konto" element={<Layout><LazyRoute><Konto /></LazyRoute></Layout>} />
+              <Route path="/:slug" element={<Layout><LazyRoute><InstrukcjaPage /></LazyRoute></Layout>} />
+            </Routes>
+          </BrowserRouter>
+          <ToastContainer />
+        </ToastProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }

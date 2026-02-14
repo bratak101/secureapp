@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
 import { useTheme } from '../context/useTheme'
-import { APP_VERSION } from '../config/version'
+
 
 function UserIcon({ className }) {
   return (
@@ -43,12 +43,16 @@ export default function Layout({ children }) {
 
   const isActive = (path) => location.pathname === path
   const linkClass = (path) =>
-    `block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-      isActive(path) ? 'bg-brand-600 text-white' : 'text-slate-300 hover:text-white hover:bg-slate-800'
+    `block px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+      isActive(path)
+        ? 'bg-brand-600 text-white'
+        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
     }`
   const subLinkClass = (path) =>
-    `block pl-6 pr-3 py-2 rounded-lg text-sm transition-colors ${
-      isActive(path) ? 'bg-slate-700 text-brand-300 font-medium' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+    `block pl-6 pr-3 py-2 rounded-lg text-sm transition-colors duration-200 ${
+      isActive(path)
+        ? 'bg-slate-200 dark:bg-slate-700 text-brand-600 dark:text-brand-300 font-medium'
+        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80'
     }`
 
   const navContent = (
@@ -65,7 +69,7 @@ export default function Layout({ children }) {
         <Link to="/windows-server" className={subLinkClass('/windows-server')} onClick={() => setSidebarOpen(false)}>Windows Server</Link>
       </div>
       {user?.role === 'admin' && (
-        <div className="pt-4 border-t border-slate-700">
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
           <Link to="/admin" className={linkClass('/admin')} onClick={() => setSidebarOpen(false)}>Admin</Link>
         </div>
       )}
@@ -74,41 +78,41 @@ export default function Layout({ children }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="shrink-0 border-b border-slate-800 bg-slate-900/95">
+      <header className="shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-slate-900/80 transition-shadow duration-200">
         <div className="flex items-center justify-between h-14 px-4">
           <div className="flex items-center gap-2">
             {isAuthenticated && (
               <button
                 type="button"
                 onClick={() => setSidebarOpen((o) => !o)}
-                className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                className="lg:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 active:scale-95"
                 aria-label="Menu"
               >
                 <MenuIcon className="w-6 h-6" />
               </button>
             )}
-            <Link to="/" className="text-lg font-semibold text-white hover:text-brand-400 transition-colors">Secure App</Link>
+            <Link to="/" className="text-lg font-semibold text-slate-900 dark:text-white hover:text-brand-500 dark:hover:text-brand-400 transition-colors duration-200">Secure App</Link>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200 active:scale-95"
               title={theme === 'dark' ? 'Jasny motyw' : 'Ciemny motyw'}
             >
               <ThemeIcon theme={theme} className="w-5 h-5" />
             </button>
             {isAuthenticated ? (
-              <Link to="/konto" className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-colors" title="Moje konto">
+              <Link to="/konto" className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200" title="Moje konto">
                 <UserIcon className="w-5 h-5" />
                 <span className="text-sm font-medium hidden sm:inline">Konto</span>
               </Link>
-            ) : (
+            ) : location.pathname !== '/' ? (
               <>
-                <Link to="/login" className="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800">Logowanie</Link>
-                <Link to="/register" className="px-3 py-2 rounded-lg text-sm font-medium text-white bg-brand-600 hover:bg-brand-500">Rejestracja</Link>
+                <Link to="/login" className="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-200">Logowanie</Link>
+                <Link to="/register" className="px-3 py-2 rounded-lg text-sm font-medium text-white bg-brand-600 hover:bg-brand-500 transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-[0.98]">Rejestracja</Link>
               </>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
@@ -116,25 +120,24 @@ export default function Layout({ children }) {
       <div className="flex flex-1 min-h-0 relative">
         {isAuthenticated && (
           <>
-            <aside className="hidden lg:flex w-56 shrink-0 flex-col py-4 border-r border-slate-800 bg-slate-900/50 px-2 space-y-1">
+            <aside className="hidden lg:flex w-56 shrink-0 flex-col py-4 border-r border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-2 space-y-1">
               {navContent}
             </aside>
             {sidebarOpen && (
-              <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setSidebarOpen(false)} aria-hidden />
+              <div className="lg:hidden fixed inset-0 z-40 bg-black/50 animate-fade-in" onClick={() => setSidebarOpen(false)} aria-hidden style={{ animationDuration: '0.15s' }} />
             )}
-            <aside className={`lg:hidden fixed top-14 left-0 z-50 w-56 h-[calc(100vh-3.5rem)] border-r border-slate-800 bg-slate-900 py-4 px-2 transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+            <aside className={`lg:hidden fixed top-14 left-0 z-50 w-56 h-[calc(100vh-3.5rem)] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-4 px-2 transition-transform duration-300 ease-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
               {navContent}
             </aside>
           </>
         )}
 
         <main className="flex-1 min-w-0 overflow-auto">
-          {children}
+          <div key={location.pathname} className="animate-slide-in-right min-h-full">
+            {children}
+          </div>
         </main>
       </div>
-      <footer className="shrink-0 py-2 px-4 border-t border-slate-800 text-center text-slate-500 text-xs">
-        Secure App v{APP_VERSION}
-      </footer>
     </div>
   )
 }

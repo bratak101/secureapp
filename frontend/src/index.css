@@ -2,11 +2,186 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   @apply font-sans antialiased min-h-screen;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-brand-500;
+}
+
+/* ===== Dark mode (default visual) ===== */
+.dark body {
   @apply bg-slate-950 text-slate-100;
 }
 
-html.light body {
-  @apply bg-slate-100 text-slate-900;
+/* ===== Light mode ===== */
+html:not(.dark) body {
+  @apply bg-slate-50 text-slate-900;
+}
+
+/* ---------- Light mode: content overrides ---------- */
+
+/* Cards / containers */
+html:not(.dark) main .card,
+html:not(.dark) main .rounded-2xl,
+html:not(.dark) main .rounded-xl {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+/* Inputs */
+html:not(.dark) input,
+html:not(.dark) textarea,
+html:not(.dark) select {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Focus rings keep brand color */
+html:not(.dark) input:focus,
+html:not(.dark) textarea:focus,
+html:not(.dark) select:focus {
+  border-color: #0ea5e9 !important;
+}
+
+/* Headings in main */
+html:not(.dark) main h1,
+html:not(.dark) main h2,
+html:not(.dark) main h3 {
+  color: #0f172a !important;
+}
+
+/* Body text overrides */
+html:not(.dark) main .text-white { color: #0f172a; }
+html:not(.dark) main .text-slate-300 { color: #475569; }
+html:not(.dark) main .text-slate-200 { color: #475569; }
+
+/* Preserve white text on brand buttons and links */
+html:not(.dark) main button.bg-brand-600,
+html:not(.dark) main button.bg-brand-500,
+html:not(.dark) main a.bg-brand-600,
+html:not(.dark) main a.bg-brand-500,
+html:not(.dark) main .bg-brand-600,
+html:not(.dark) main .bg-brand-500 {
+  color: #ffffff !important;
+}
+
+/* Dividers */
+html:not(.dark) main .divide-y > :not([hidden]) ~ :not([hidden]) {
+  border-color: #e2e8f0;
+}
+
+/* Code blocks */
+html:not(.dark) main pre {
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #334155 !important;
+}
+html:not(.dark) main code {
+  color: #0369a1;
+}
+
+/* Slate buttons */
+html:not(.dark) main .bg-slate-700 {
+  background-color: #e2e8f0;
+  color: #334155;
+}
+html:not(.dark) main .bg-slate-700:hover {
+  background-color: #cbd5e1;
+}
+
+/* Download file cards - hover */
+html:not(.dark) main a.rounded-xl:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Section borders */
+html:not(.dark) main .border-t { border-top-color: #e2e8f0; }
+html:not(.dark) main .border-b { border-bottom-color: #e2e8f0; }
+
+/* Underline links keep brand color */
+html:not(.dark) main .text-brand-400 { color: #0284c7; }
+html:not(.dark) main .text-brand-300 { color: #0369a1; }
+
+/* Shadow adjustments */
+html:not(.dark) main .shadow-xl {
+  --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+}
+
+/* ===== Hero section – ma ciemne tło w obu trybach, więc zachowaj kolory ===== */
+html:not(.dark) main .home-hero-section h1,
+html:not(.dark) main .home-hero-section h2,
+html:not(.dark) main .home-hero-section h3 {
+  color: #ffffff !important;
+}
+html:not(.dark) main .home-hero-section p {
+  color: #cbd5e1 !important;
+}
+html:not(.dark) main .home-hero-section a.bg-brand-600 {
+  color: #ffffff !important;
+}
+
+/* ===== Animacje wejścia (CSS, żeby zawsze działały) ===== */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== Homepage hero – animacje ===== */
+@keyframes home-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes home-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes home-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(24px, -16px) scale(1.06); }
+  66% { transform: translate(-16px, 12px) scale(0.96); }
+}
+
+.home-hero-bg {
+  background-size: 300% 300%;
+  animation: home-gradient-shift 18s ease infinite;
+}
+.home-hero-float {
+  animation: home-float 16s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Beam – pozioma linia przelatująca przez ekran */
+@keyframes home-beam {
+  0%   { transform: translateX(-100%); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateX(350%); opacity: 0; }
+}
+.home-hero-beam {
+  animation: home-beam 12s linear infinite;
+  will-change: transform;
+}
+
+/* Particles – drobne cząstki unoszące się w górę */
+@keyframes home-particle {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  15%  { opacity: 0.6; }
+  85%  { opacity: 0.3; }
+  100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+}
+.home-hero-particle {
+  animation: home-particle 10s ease-in-out infinite;
 }
