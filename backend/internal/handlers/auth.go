@@ -120,9 +120,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 	passwordHash := auth.HashPassword(salt, req.Password)
 
-	// Prepared Statement – ochrona przed SQL Injection
+	// Prepared Statement – ochrona przed SQL Injection (created_at jawnie – działa przy TIMESTAMP i DATE)
 	res, err := database.DB.Exec(
-		`INSERT INTO users (username, email, password_hash, salt) VALUES (?, ?, ?, ?)`,
+		`INSERT INTO users (username, email, password_hash, salt, created_at) VALUES (?, ?, ?, ?, NOW())`,
 		req.Username,
 		req.Email,
 		passwordHash,
@@ -136,6 +136,10 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		}
 		if strings.Contains(err.Error(), "Unknown database") || strings.Contains(err.Error(), "doesn't exist") {
 			respondError(w, http.StatusServiceUnavailable, "Database not ready. Run schema.sql in phpMyAdmin.")
+			return
+		}
+		if strings.Contains(err.Error(), "Unknown column") {
+			respondError(w, http.StatusServiceUnavailable, "Tabela users ma zla strukture. Uruchom database/schema.sql (kolumna created_at TIMESTAMP).")
 			return
 		}
 		if strings.Contains(err.Error(), "Access denied") || strings.Contains(err.Error(), "connection refused") {
