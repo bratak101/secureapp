@@ -1,0 +1,28 @@
+# Dependencies
+frontend/node_modules/
+backend/vendor/
+
+# Build / runtime
+frontend/dist/
+*.exe
+*.test
+
+# Env and secrets (NIGDY nie commituj kluczy)
+.env
+.env.local
+.env.*.local
+*.pem
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Go
+backend/*.exe
