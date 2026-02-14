@@ -11,6 +11,15 @@ import (
 )
 
 func main() {
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = os.Getenv("MYSQLHOST")
+	}
+	if dbHost != "" {
+		log.Printf("DB_HOST/MYSQLHOST is set (len=%d)", len(dbHost))
+	} else {
+		log.Printf("DB_HOST and MYSQLHOST are both empty - using default 127.0.0.1:3306")
+	}
 	if err := database.Init(); err != nil {
 		log.Fatalf("Database: %v", err)
 	}
