@@ -1,7 +1,8 @@
-package turnstile
+package recaptcha
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -9,16 +10,16 @@ import (
 	"time"
 )
 
-const siteverifyURL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+const verifyURL = "https://www.google.com/recaptcha/api/siteverify"
 
-type siteverifyResponse struct {
+type verifyResponse struct {
 	Success bool     `json:"success"`
-	ErrorCodes []string `json:"error-codes"`
+	ErrorCodes []string `json:"error-codes,omitempty"`
 }
 
-// Verify sprawdza token u Cloudflare. Gdy TURNSTILE_SECRET_KEY nie jest ustawiony, zwraca true (pomijamy weryfikację lokalnie).
+// Verify sprawdza token u Google. Gdy RECAPTCHA_SECRET_KEY nie jest ustawiony, zwraca true (pomijamy lokalnie).
 func Verify(token, remoteIP string) bool {
-	secret := os.Getenv("TURNSTILE_SECRET_KEY")
+	secret := os.Getenv("RECAPTCHA_SECRET_KEY")
 	if secret == "" {
 		return true
 	}
@@ -32,7 +33,7 @@ func Verify(token, remoteIP string) bool {
 	if remoteIP != "" {
 		form.Set("remoteip", remoteIP)
 	}
-	req, err := http.NewRequest(http.MethodPost, siteverifyURL, strings.NewReader(form.Encode()))
+	req, err := http.NewRequest(http.MethodPost, verifyURL, strings.NewReader(form.Encode()))
 	if err != nil {
 		return false
 	}
@@ -43,8 +44,9 @@ func Verify(token, remoteIP string) bool {
 		return false
 	}
 	defer resp.Body.Close()
-	var out siteverifyResponse
-	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+	body, _ := io.ReadAll(resp.Body)
+	var out verifyResponse
+	if err := json.Unmarshal(body, &out); err != nil {
 		return false
 	}
 	return out.Success

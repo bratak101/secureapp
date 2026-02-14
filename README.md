@@ -41,7 +41,7 @@ Zmienne środowiskowe (opcjonalne):
 | `DB_HOST` | `127.0.0.1:3306`    | Adres MySQL (host:port)  |
 | `DB_NAME` | `secure_app`        | Nazwa bazy              |
 | `JWT_SECRET` | *(wbudowany)*    | Sekret JWT (w produkcji ustaw!) |
-| `TURNSTILE_SECRET_KEY` | *(puste)* | Klucz Turnstile (Cloudflare); gdy pusty – weryfikacja „robot” wyłączona |
+| `RECAPTCHA_SECRET_KEY` | *(puste)* | Klucz Google reCAPTCHA; gdy pusty – weryfikacja wyłączona |
 | `PORT` | `8080` | Port HTTP backendu |
 
 Przykład (PowerShell):
@@ -130,7 +130,7 @@ Zatrzymanie: zamknij okna „Secure App - Backend” i „Secure App - Frontend�
 - **CORS**: middleware na backendzie (dozwolone metody i nagłówki).
 - **Walidacja**: długość username/email/hasła, format email (regex).
 - **Sesja**: JWT (24 h), przechowywany po stronie frontendu w **localStorage** (dla produkcji warto rozważyć httpOnly cookie).
-- **Turnstile (Cloudflare)**: weryfikacja „nie jestem robotem” na rejestracji i logowaniu (darmowa; klucze w env).
+- **Google reCAPTCHA**: weryfikacja „nie jestem robotem” na rejestracji i logowaniu (darmowa; klucze w env).
 - **Rate limiting**: 10 żądań/min na IP dla `/register` i `/login` (ochrona przed brute force).
 
 **Wdrożenie (GitHub, darmowy hosting, DDoS):** patrz **[DEPLOY.md](DEPLOY.md)**.

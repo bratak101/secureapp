@@ -9,7 +9,7 @@ import (
 
 	"secure-app/backend/internal/auth"
 	"secure-app/backend/internal/database"
-	"secure-app/backend/internal/turnstile"
+	"secure-app/backend/internal/recaptcha"
 )
 
 var (
@@ -21,14 +21,14 @@ type RegisterRequest struct {
 	Username       string `json:"username"`
 	Email          string `json:"email"`
 	Password       string `json:"password"`
-	TurnstileToken string `json:"turnstile_token"`
+	RecaptchaToken string `json:"recaptcha_token"`
 }
 
 // LoginRequest body logowania.
 type LoginRequest struct {
 	Email          string `json:"email"`
 	Password       string `json:"password"`
-	TurnstileToken string `json:"turnstile_token"`
+	RecaptchaToken string `json:"recaptcha_token"`
 }
 
 // AuthResponse odpowiedź z tokenem.
@@ -108,8 +108,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "Password must be at least 8 characters")
 		return
 	}
-	if !turnstile.Verify(req.TurnstileToken, remoteIP(r)) {
-		respondError(w, http.StatusBadRequest, "Weryfikacja (nie jestem robotem) nie powiodla sie. Odswiez strone i sprobuj ponownie.")
+	if !recaptcha.Verify(req.RecaptchaToken, remoteIP(r)) {
+		respondError(w, http.StatusBadRequest, "Weryfikacja reCAPTCHA nie powiodla sie. Odswiez strone i sprobuj ponownie.")
 		return
 	}
 
@@ -174,8 +174,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusBadRequest, "Email and password required")
 		return
 	}
-	if !turnstile.Verify(req.TurnstileToken, remoteIP(r)) {
-		respondError(w, http.StatusBadRequest, "Weryfikacja (nie jestem robotem) nie powiodla sie. Odswiez strone i sprobuj ponownie.")
+	if !recaptcha.Verify(req.RecaptchaToken, remoteIP(r)) {
+		respondError(w, http.StatusBadRequest, "Weryfikacja reCAPTCHA nie powiodla sie. Odswiez strone i sprobuj ponownie.")
 		return
 	}
 

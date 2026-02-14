@@ -24,13 +24,13 @@ export async function checkHealth() {
   }
 }
 
-export async function register(username, email, password, turnstileToken = '') {
+export async function register(username, email, password, recaptchaToken = '') {
   let res
   try {
     res = await fetch(`${API_BASE}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password, turnstile_token: turnstileToken }),
+      body: JSON.stringify({ username, email, password, recaptcha_token: recaptchaToken }),
     })
   } catch (err) {
     if (err.name === 'TypeError' && err.message.includes('fetch')) {
@@ -42,13 +42,13 @@ export async function register(username, email, password, turnstileToken = '') {
   return res.json()
 }
 
-export async function login(email, password, turnstileToken = '') {
+export async function login(email, password, recaptchaToken = '') {
   let res
   try {
     res = await fetch(`${API_BASE}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, turnstile_token: turnstileToken }),
+      body: JSON.stringify({ email, password, recaptcha_token: recaptchaToken }),
     })
   } catch (err) {
     if (err.name === 'TypeError' && err.message.includes('fetch')) {

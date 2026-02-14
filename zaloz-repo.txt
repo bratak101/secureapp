@@ -1,0 +1,22 @@
+=== ZALOZ REPO NA GITHUB (ok. 30 sekund) ===
+
+1. Otworz w przegladarce:  https://github.com/new
+
+2. Wypelnij:
+   - Repository name:  secure-app
+   - Public
+   - NIE zaznaczaj "Add a README file"
+   - Kliknij zielony przycisk "Create repository"
+
+3. Po utworzeniu GitHub pokaze strone z komendami.
+   NIE uruchamiaj "git init" ani "git remote" - to juz masz zrobione.
+   W terminalu wpisz TYLKO:
+
+   git remote remove origin
+   git remote add origin https://github.com/TWOJA_NAZWA/secure-app.git
+   git push -u origin main
+
+   Zamien TWOJA_NAZWA na swoja nazwe uzytkownika z GitHub
+   (ta sama co w adresie strony po zalogowaniu - np. github.com/JanKowalski)
+
+Gotowe.

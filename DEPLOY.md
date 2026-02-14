@@ -40,7 +40,7 @@ git push -u origin main
 5. **Output Directory**: `dist`
 6. **Environment Variables**:
    - `VITE_API_URL` = URL Twojego backendu (np. `https://secure-app-xxx.onrender.com`)
-   - `VITE_TURNSTILE_SITE_KEY` = klucz publiczny Turnstile (opcjonalnie)
+   - `VITE_RECAPTCHA_SITE_KEY` = klucz publiczny reCAPTCHA (opcjonalnie)
 7. Deploy.
 
 ### Backend (Render)
@@ -53,7 +53,7 @@ git push -u origin main
 6. **Environment**:
    - `DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME` – dane z PlanetScale/Railway
    - `JWT_SECRET` – długi losowy string
-   - `TURNSTILE_SECRET_KEY` – klucz prywatny Turnstile (jeśli używasz)
+   - `RECAPTCHA_SECRET_KEY` – klucz prywatny reCAPTCHA (jeśli używasz)
    - `PORT` – Render ustawia sam (np. 10000)
 7. Zapisz – Render zbuduje i uruchomi backend. Skopiuj URL serwisu (np. `https://secure-app-xxx.onrender.com`).
 
@@ -65,13 +65,13 @@ git push -u origin main
 4. Tabelę `users` utwórz przez **Console** (SQL) – skopiuj treść z `database/schema.sql` (dostosuj do PlanetScale jeśli trzeba).
 5. W Render (backend) ustaw zmienne: `DB_HOST=...`, `DB_USER=...`, `DB_PASS=...`, `DB_NAME=...`.
 
-### Turnstile (Cloudflare, darmowy)
+### Google reCAPTCHA (darmowy)
 
-1. [dash.cloudflare.com](https://dash.cloudflare.com) → **Turnstile** → **Add site**.
-2. Nazwa np. „Secure App”, domena: Twoja domena Vercel (np. `*.vercel.app`) oraz `localhost` do testów.
+1. [google.com/recaptcha/admin](https://www.google.com/recaptcha/admin) → **Create**.
+2. Wybierz **reCAPTCHA v2** (checkbox „I'm not a robot”), dodaj domeny (np. `*.vercel.app`, `localhost`).
 3. Skopiuj **Site Key** (frontend) i **Secret Key** (backend).
-4. **Frontend (Vercel)**: `VITE_TURNSTILE_SITE_KEY` = Site Key.
-5. **Backend (Render)**: `TURNSTILE_SECRET_KEY` = Secret Key.
+4. **Frontend (Vercel)**: `VITE_RECAPTCHA_SITE_KEY` = Site Key.
+5. **Backend (Render/Railway)**: `RECAPTCHA_SECRET_KEY` = Secret Key.
 
 ---
 
@@ -92,8 +92,8 @@ Dla samego backendu (Render) Cloudflare można postawić przed nim tylko gdy mas
 
 ## 4. Podsumowanie zabezpieczeń w projekcie
 
-- **Turnstile** – weryfikacja „nie jestem robotem” (rejestracja/logowanie).
+- **Google reCAPTCHA** – weryfikacja „nie jestem robotem” (rejestracja/logowanie).
 - **Rate limiting** – 10 żądań/min na IP na `/register` i `/login` (ochrona przed brute force i spamem).
 - **Cloudflare** – ochrona DDoS i dodatkowy rate limit na poziomie sieci (po podłączeniu domeny).
 
-Lokalnie (bez ustawionych kluczy Turnstile) widget się nie wyświetla, a backend pomija weryfikację Turnstile. Rate limiting działa zawsze.
+Lokalnie używany jest klucz testowy Google (widget zawsze widoczny). Na produkcji ustaw prawdziwe klucze. Rate limiting działa zawsze.

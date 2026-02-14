@@ -1,0 +1,12 @@
+# Nixpacks / Railpack – jawna konfiguracja buildu Go
+[phases.setup]
+nixPkgs = ["go_1_21"]
+
+[phases.install]
+cmds = ["go mod download"]
+
+[phases.build]
+cmds = ["go build -o server ."]
+
+[start]
+cmd = "./server"

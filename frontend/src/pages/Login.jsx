@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import * as api from '../api/client'
 import { useAuth } from '../context/useAuth'
-import { TurnstileWidget } from '../components/TurnstileWidget'
+import { RecaptchaWidget } from '../components/RecaptchaWidget'
 
 export default function Login() {
   const navigate = useNavigate()
   const { setToken } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [turnstileToken, setTurnstileToken] = useState('')
+  const [recaptchaToken, setRecaptchaToken] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -19,7 +19,7 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const data = await api.login(email, password, turnstileToken)
+      const data = await api.login(email, password, recaptchaToken)
       setToken(data.token, { user_id: data.user_id, username: data.username })
       setSuccess(true)
       setTimeout(() => navigate('/'), 600)
@@ -80,9 +80,9 @@ export default function Login() {
               />
             </div>
             <div className="flex justify-center">
-              <TurnstileWidget
-                onVerify={setTurnstileToken}
-                onExpire={() => setTurnstileToken('')}
+              <RecaptchaWidget
+                onVerify={setRecaptchaToken}
+                onExpire={() => setRecaptchaToken('')}
               />
             </div>
             <button
