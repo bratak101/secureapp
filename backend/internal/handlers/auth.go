@@ -9,6 +9,8 @@ import (
 
 	"secure-app/backend/internal/auth"
 	"secure-app/backend/internal/database"
+	"secure-app/backend/internal/email"
+	"secure-app/backend/internal/middleware"
 	"secure-app/backend/internal/recaptcha"
 )
 
@@ -36,6 +38,15 @@ type AuthResponse struct {
 	Token    string `json:"token"`
 	UserID   uint   `json:"user_id"`
 	Username string `json:"username"`
+	Role     string `json:"role,omitempty"`
+}
+
+// MeResponse dane użytkownika z /me.
+type MeResponse struct {
+	UserID   uint   `json:"user_id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
 }
 
 // ErrorResponse błąd API.
@@ -122,7 +133,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 
 	// Prepared Statement – ochrona przed SQL Injection (created_at jawnie – działa przy TIMESTAMP i DATE)
 	res, err := database.DB.Exec(
-		`INSERT INTO users (username, email, password_hash, salt, created_at) VALUES (?, ?, ?, ?, NOW())`,
+		`INSERT INTO users (username, email, password_hash, salt, role, created_at) VALUES (?, ?, ?, ?, 'user', NOW())`,
 		req.Username,
 		req.Email,
 		passwordHash,
@@ -159,6 +170,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		Token:    token,
 		UserID:   uint(id),
 		Username: req.Username,
+		Role:     "user",
 	})
 }
 
@@ -184,12 +196,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var id uint
-	var username, passwordHash, salt string
-	// Prepared Statement – ochrona przed SQL Injection
+	var username, passwordHash, salt, role string
 	err := database.DB.QueryRow(
-		`SELECT id, username, password_hash, salt FROM users WHERE email = ? LIMIT 1`,
+		`SELECT id, username, password_hash, salt, COALESCE(role, 'user') FROM users WHERE email = ? LIMIT 1`,
 		req.Email,
-	).Scan(&id, &username, &passwordHash, &salt)
+	).Scan(&id, &username, &passwordHash, &salt, &role)
 	if err != nil {
 		respondError(w, http.StatusUnauthorized, "Invalid email or password")
 		return
@@ -207,5 +218,183 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		Token:    token,
 		UserID:   id,
 		Username: username,
+		Role:     role,
 	})
+}
+
+// Me zwraca dane zalogowanego użytkownika (wymaga Bearer token).
+func Me(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		respondError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+	userID := middleware.GetUserID(r)
+	var username, email, role string
+	err := database.DB.QueryRow(
+		`SELECT username, email, COALESCE(role, 'user') FROM users WHERE id = ? LIMIT 1`,
+		userID,
+	).Scan(&username, &email, &role)
+	if err != nil {
+		respondError(w, http.StatusNotFound, "User not found")
+		return
+	}
+	respondJSON(w, http.StatusOK, MeResponse{
+		UserID:   userID,
+		Username: username,
+		Email:    email,
+		Role:     role,
+	})
+}
+
+// ChangePasswordRequest body zmiany hasła.
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
+}
+
+// ChangePassword zmienia hasło zalogowanego użytkownika.
+func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		respondError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+	userID := middleware.GetUserID(r)
+	var req ChangePasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+	req.NewPassword = strings.TrimSpace(req.NewPassword)
+	if len(req.NewPassword) < 8 {
+		respondError(w, http.StatusBadRequest, "Nowe haslo musi miec min. 8 znakow")
+		return
+	}
+	var passwordHash, salt string
+	err := database.DB.QueryRow(`SELECT password_hash, salt FROM users WHERE id = ?`, userID).Scan(&passwordHash, &salt)
+	if err != nil {
+		respondError(w, http.StatusNotFound, "User not found")
+		return
+	}
+	if !auth.VerifyPassword(salt, passwordHash, req.OldPassword) {
+		respondError(w, http.StatusUnauthorized, "Obecne haslo jest nieprawidlowe")
+		return
+	}
+	newSalt, err := auth.GenerateSalt()
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Server error")
+		return
+	}
+	newHash := auth.HashPassword(newSalt, req.NewPassword)
+	_, err = database.DB.Exec(`UPDATE users SET password_hash = ?, salt = ?, password_reset_code = NULL, password_reset_expires_at = NULL WHERE id = ?`, newHash, newSalt, userID)
+	if err != nil {
+		log.Printf("[CHANGE_PASSWORD] %v", err)
+		respondError(w, http.StatusInternalServerError, "Server error")
+		return
+	}
+	respondJSON(w, http.StatusOK, map[string]string{"ok": "Haslo zmienione"})
+}
+
+// ForgotPasswordRequest body przypomnienia hasła.
+type ForgotPasswordRequest struct {
+	Email          string `json:"email"`
+	RecaptchaToken string `json:"recaptcha_token"`
+}
+
+// ForgotPassword wysyła kod resetu na e-mail.
+func ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		respondError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+	var req ForgotPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
+	if !emailRegex.MatchString(req.Email) {
+		respondError(w, http.StatusBadRequest, "Nieprawidlowy email")
+		return
+	}
+	if !recaptcha.Verify(req.RecaptchaToken, remoteIP(r)) {
+		respondError(w, http.StatusBadRequest, "Weryfikacja reCAPTCHA nie powiodla sie.")
+		return
+	}
+	code, err := auth.GenerateVerificationCode()
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Server error")
+		return
+	}
+	res, err := database.DB.Exec(
+		`UPDATE users SET password_reset_code = ?, password_reset_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE email = ?`,
+		code, req.Email,
+	)
+	if err != nil {
+		if strings.Contains(err.Error(), "Unknown column") {
+			respondError(w, http.StatusServiceUnavailable, "Reset hasla niedostepny. Uruchom migrate-add-role-reset.sql.")
+			return
+		}
+		log.Printf("[FORGOT_PASSWORD] %v", err)
+		respondError(w, http.StatusInternalServerError, "Server error")
+		return
+	}
+	rows, _ := res.RowsAffected()
+	if rows == 0 {
+		respondError(w, http.StatusNotFound, "Nie znaleziono konta z tym adresem e-mail")
+		return
+	}
+	if err := email.SendPasswordReset(req.Email, code); err != nil {
+		log.Printf("[FORGOT_PASSWORD] SendPasswordReset: %v", err)
+	}
+	respondJSON(w, http.StatusOK, map[string]string{"ok": "Jesli konto istnieje, kod zostal wyslany na e-mail"})
+}
+
+// ResetPasswordRequest body resetu hasła (z kodem).
+type ResetPasswordRequest struct {
+	Email       string `json:"email"`
+	Code        string `json:"code"`
+	NewPassword string `json:"new_password"`
+}
+
+// ResetPassword ustawia nowe hasło po weryfikacji kodu.
+func ResetPassword(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		respondError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+	var req ResetPasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "Invalid JSON")
+		return
+	}
+	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
+	req.Code = strings.TrimSpace(req.Code)
+	req.NewPassword = strings.TrimSpace(req.NewPassword)
+	if req.Email == "" || len(req.Code) != 6 || len(req.NewPassword) < 8 {
+		respondError(w, http.StatusBadRequest, "Email, 6-cyfrowy kod i nowe haslo (min. 8 zn.) wymagane")
+		return
+	}
+	var id uint
+	var salt string
+	err := database.DB.QueryRow(
+		`SELECT id, salt FROM users WHERE email = ? AND password_reset_code = ? AND password_reset_expires_at > NOW() LIMIT 1`,
+		req.Email, req.Code,
+	).Scan(&id, &salt)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "Nieprawidlowy lub wygasly kod. Sprobuj ponownie.")
+		return
+	}
+	newSalt, err := auth.GenerateSalt()
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "Server error")
+		return
+	}
+	newHash := auth.HashPassword(newSalt, req.NewPassword)
+	_, err = database.DB.Exec(`UPDATE users SET password_hash = ?, salt = ?, password_reset_code = NULL, password_reset_expires_at = NULL WHERE id = ?`, newHash, newSalt, id)
+	if err != nil {
+		log.Printf("[RESET_PASSWORD] %v", err)
+		respondError(w, http.StatusInternalServerError, "Server error")
+		return
+	}
+	respondJSON(w, http.StatusOK, map[string]string{"ok": "Haslo zresetowane. Mozesz sie zalogowac."})
 }

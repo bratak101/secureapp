@@ -29,6 +29,10 @@ func main() {
 	mux.HandleFunc("/health", handlers.Health)
 	mux.HandleFunc("/register", middleware.RateLimit(handlers.Register))
 	mux.HandleFunc("/login", middleware.RateLimit(handlers.Login))
+	mux.HandleFunc("/forgot-password", middleware.RateLimit(handlers.ForgotPassword))
+	mux.HandleFunc("/reset-password", middleware.RateLimit(handlers.ResetPassword))
+	mux.HandleFunc("/me", middleware.RequireAuth(handlers.Me))
+	mux.HandleFunc("/change-password", middleware.RateLimit(middleware.RequireAuth(handlers.ChangePassword)))
 
 	handler := middleware.CORS(mux)
 	port := os.Getenv("PORT")

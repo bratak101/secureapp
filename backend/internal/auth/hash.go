@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/hex"
+	"fmt"
 )
 
 const SaltSize = 32
@@ -30,4 +31,14 @@ func HashPassword(salt, password string) string {
 func VerifyPassword(salt, passwordHash, password string) bool {
 	expected := HashPassword(salt, password)
 	return subtle.ConstantTimeCompare([]byte(expected), []byte(passwordHash)) == 1
+}
+
+// GenerateVerificationCode zwraca 6-cyfrowy kod.
+func GenerateVerificationCode() (string, error) {
+	b := make([]byte, 3)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	n := uint32(b[0])<<16 | uint32(b[1])<<8 | uint32(b[2])
+	return fmt.Sprintf("%06d", n%1000000), nil
 }
