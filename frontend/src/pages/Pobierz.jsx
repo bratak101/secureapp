@@ -11,8 +11,8 @@ export default function Pobierz() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-2xl font-bold text-white mb-2">Pliki do pobrania</h1>
-      <p className="text-slate-400 mb-8">
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Pliki do pobrania</h1>
+      <p className="text-slate-500 dark:text-slate-400 mb-8">
         Pobierz dokumenty i materiały dostępne dla zalogowanych użytkowników.
       </p>
       <ul className="space-y-3">
@@ -23,21 +23,21 @@ export default function Pobierz() {
               download
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 rounded-xl border border-slate-700/60 bg-slate-800/50 hover:bg-slate-800 hover:border-slate-600 transition-colors group"
+              className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-600 transition-colors group"
             >
-              <span className="shrink-0 w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-400 group-hover:text-brand-400">
+              <span className="shrink-0 w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:text-brand-500 dark:group-hover:text-brand-400">
                 ↓
               </span>
               <div className="min-w-0 flex-1">
-                <span className="font-medium text-white group-hover:text-brand-400">
+                <span className="font-medium text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400">
                   {file.name}
                 </span>
                 {file.description && (
-                  <p className="text-sm text-slate-500 mt-0.5">{file.description}</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{file.description}</p>
                 )}
               </div>
               {file.size && (
-                <span className="text-sm text-slate-500">{file.size}</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">{file.size}</span>
               )}
             </a>
           </li>

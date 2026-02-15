@@ -23,6 +23,12 @@ export default {
           800: '#075985',
           900: '#0c4a6e',
         },
+        // Linux – wyraźny pomarańczowy (nie żółty)
+        linux: {
+          DEFAULT: '#F97316',
+          light: '#FB923C',
+          dark: '#EA580C',
+        },
       },
       transitionDuration: {
         200: '200ms',

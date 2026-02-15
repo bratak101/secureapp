@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import * as api from '../api/client'
 import { useAuth } from '../context/useAuth'
 import { useToast } from '../context/useToast'
 import { RecaptchaWidget } from '../components/RecaptchaWidget'
+import Input from '../components/ui/Input'
+import Button from '../components/ui/Button'
+import Card from '../components/ui/Card'
+import { validateEmail, validateUsername, validatePassword, passwordStrength } from '../lib/validation'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -17,12 +21,37 @@ export default function Register() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [usernameError, setUsernameError] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [confirmError, setConfirmError] = useState('')
+
+  useEffect(() => {
+    setUsernameError(username ? validateUsername(username) : '')
+  }, [username])
+  useEffect(() => {
+    setEmailError(email ? validateEmail(email) : '')
+  }, [email])
+  useEffect(() => {
+    setPasswordError(password ? validatePassword(password, 'Hasło') : '')
+  }, [password])
+  useEffect(() => {
+    setConfirmError(confirmPassword && password !== confirmPassword ? 'Hasła muszą być identyczne' : '')
+  }, [password, confirmPassword])
+
+  const pwStrength = passwordStrength(password)
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    const uErr = validateUsername(username)
+    const eErr = validateEmail(email)
+    const pErr = validatePassword(password, 'Hasło')
+    if (uErr) { setUsernameError(uErr); return }
+    if (eErr) { setEmailError(eErr); return }
+    if (pErr) { setPasswordError(pErr); return }
     if (password !== confirmPassword) {
-      setError('Hasła muszą być identyczne')
+      setConfirmError('Hasła muszą być identyczne')
       return
     }
     setLoading(true)
@@ -44,98 +73,79 @@ export default function Register() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-md animate-scale-in">
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900/80 shadow-xl shadow-slate-200/50 dark:shadow-black/20 p-8 transition-all duration-300 hover:shadow-2xl hover:shadow-slate-300/30 dark:hover:shadow-black/30 hover:-translate-y-1">
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white mb-1">Utwórz konto</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Wypełnij formularz rejestracji</p>
-
+        <Card title="Utwórz konto" subtitle="Wypełnij formularz rejestracji">
           {error && (
-            <div key={error} className="mb-4 p-3 rounded-lg bg-red-500/15 text-red-400 text-sm border border-red-500/30 animate-shake">
-              {error}
+            <div className="mb-4 p-3 rounded-lg bg-red-500/15 text-red-400 text-sm border border-red-500/30 animate-shake" role="alert">
+              <p>{error}</p>
+              <button type="button" onClick={() => setError('')} className="mt-2 text-sm font-medium underline hover:no-underline">
+                Spróbuj ponownie
+              </button>
             </div>
           )}
           {success && (
-            <div className="mb-4 p-3 rounded-lg bg-emerald-500/15 text-emerald-400 text-sm border border-emerald-500/30">
+            <div className="mb-4 p-3 rounded-lg bg-emerald-500/15 text-emerald-400 text-sm border border-emerald-500/30" role="status">
               Konto utworzone. Przekierowanie…
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                Nazwa użytkownika
-              </label>
-              <input
-                id="username"
-                type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-                minLength={3}
-                maxLength={64}
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/80 border border-slate-600/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="jan_kowalski"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/80 border border-slate-600/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="twoj@email.pl"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                Hasło
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/80 border border-slate-600/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="min. 8 znaków"
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">
-                Powtórz hasło
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2.5 rounded-lg bg-slate-800/80 border border-slate-600/60 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                placeholder="••••••••"
-              />
-            </div>
+            <Input
+              id="username"
+              label="Nazwa użytkownika"
+              type="text"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="jan_kowalski"
+              error={usernameError}
+              minLength={3}
+              maxLength={64}
+              required
+            />
+            <Input
+              id="email"
+              label="Email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="twoj@email.pl"
+              error={emailError}
+              required
+            />
+            <Input
+              id="password"
+              label="Hasło"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="min. 8 znaków"
+              error={passwordError}
+              hint={pwStrength.label ? `Siła hasła: ${pwStrength.label}` : ''}
+              minLength={8}
+              required
+            />
+            <Input
+              id="confirmPassword"
+              label="Powtórz hasło"
+              type="password"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              error={confirmError}
+              required
+            />
             <div className="flex justify-center">
               <RecaptchaWidget
                 onVerify={setRecaptchaToken}
                 onExpire={() => setRecaptchaToken('')}
               />
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-lg font-medium text-white bg-brand-600 hover:bg-brand-500 focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 focus:ring-brand-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-300 hover:shadow-xl hover:scale-[1.03] hover:-translate-y-0.5 active:scale-[0.99]"
-            >
-              {loading ? 'Rejestracja…' : 'Zarejestruj się'}
-            </button>
+            <Button type="submit" loading={loading} className="w-full py-3">
+              Zarejestruj się
+            </Button>
           </form>
 
           <p className="mt-6 text-center text-slate-500 dark:text-slate-400 text-sm">
@@ -144,7 +154,7 @@ export default function Register() {
               Zaloguj się
             </Link>
           </p>
-        </div>
+        </Card>
       </div>
     </div>
   )

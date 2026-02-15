@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback } from 'react'
+import { createContext, useState, useCallback, useEffect } from 'react'
 
 const TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
@@ -20,11 +20,11 @@ export function AuthProvider({ children }) {
 
   const setToken = useCallback((newToken, newUser) => {
     if (newToken && newUser) {
-      const user = { ...newUser, role: newUser.role || 'user' }
+      const userData = { ...newUser, role: newUser.role || 'user' }
       localStorage.setItem(TOKEN_KEY, newToken)
-      localStorage.setItem(USER_KEY, JSON.stringify(user))
+      localStorage.setItem(USER_KEY, JSON.stringify(userData))
       setTokenState(newToken)
-      setUser(user)
+      setUser(userData)
     } else {
       localStorage.removeItem(TOKEN_KEY)
       localStorage.removeItem(USER_KEY)
@@ -32,6 +32,27 @@ export function AuthProvider({ children }) {
       setUser(null)
     }
   }, [])
+
+  // Po starcie aplikacji: odśwież dane użytkownika (w tym rolę admin) z backendu
+  useEffect(() => {
+    if (!token) return
+    import('../api/client').then(({ me }) => {
+      me()
+        .then((data) => {
+          const updated = {
+            user_id: data.user_id,
+            username: data.username,
+            email: data.email,
+            role: data.role || 'user',
+          }
+          setUser(updated)
+          try {
+            localStorage.setItem(USER_KEY, JSON.stringify(updated))
+          } catch (_) {}
+        })
+        .catch(() => {})
+    })
+  }, [token])
 
   const logout = useCallback(() => {
     setToken(null, null)

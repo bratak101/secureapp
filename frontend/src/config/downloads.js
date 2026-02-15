@@ -25,3 +25,9 @@ export const DOWNLOADS_BY_SLUG = {
 export function getDownloadsForSlug(slug) {
   return DOWNLOADS_BY_SLUG[slug] || []
 }
+
+// Wszystkie pliki na jednej stronie „Pobierz” (strona /pobierz)
+export const DOWNLOAD_FILES = [
+  { id: 'regulamin', name: 'Regulamin', description: 'Regulamin serwisu', url: '/downloads/regulamin.txt', size: null },
+  { id: 'instrukcja', name: 'Instrukcja ogólna', description: 'Skrócona instrukcja', url: '/downloads/instrukcja.txt', size: null },
+]

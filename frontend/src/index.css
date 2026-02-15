@@ -111,6 +111,77 @@ html:not(.dark) main a.rounded-xl:hover {
 html:not(.dark) main .border-t { border-top-color: #e2e8f0; }
 html:not(.dark) main .border-b { border-bottom-color: #e2e8f0; }
 
+/* Linux – pomarańczowy (#F97316) w JASNYM trybie */
+html:not(.dark) main [data-theme="linux-desktop"] .instruction-header-box,
+html:not(.dark) main [data-theme="linux-server"] .instruction-header-box {
+  border-color: #F97316 !important;
+  background-color: rgba(249, 115, 22, 0.3) !important;
+}
+html:not(.dark) main [data-theme="linux-desktop"] a.text-linux,
+html:not(.dark) main [data-theme="linux-server"] a.text-linux,
+html:not(.dark) main [data-theme="linux-desktop"] .text-linux,
+html:not(.dark) main [data-theme="linux-server"] .text-linux {
+  color: #F97316 !important;
+}
+
+/* Linux – pomarańczowy w CIEMNYM trybie (sidebar + strona instrukcji) */
+.dark .nav-link-active-linux {
+  background-color: rgba(249, 115, 22, 0.35) !important;
+  border-left-color: #F97316 !important;
+  color: #ffffff !important;
+}
+.dark main [data-theme="linux-desktop"] .instruction-header-box,
+.dark main [data-theme="linux-server"] .instruction-header-box {
+  border-color: #F97316 !important;
+  background-color: rgba(249, 115, 22, 0.25) !important;
+}
+.dark main [data-theme="linux-desktop"] a.text-linux,
+.dark main [data-theme="linux-server"] a.text-linux,
+.dark main [data-theme="linux-desktop"] .text-linux,
+.dark main [data-theme="linux-server"] .text-linux,
+.dark main [data-theme="linux-desktop"] .instruction-header-box .text-linux-dark,
+.dark main [data-theme="linux-server"] .instruction-header-box .text-linux-dark {
+  color: #F97316 !important;
+}
+.dark main [data-theme="linux-desktop"] a.border-linux,
+.dark main [data-theme="linux-server"] a.border-linux {
+  border-color: #F97316 !important;
+  color: #F97316 !important;
+}
+.dark main [data-theme="linux-desktop"] a.border-linux:hover,
+.dark main [data-theme="linux-server"] a.border-linux:hover {
+  background-color: rgba(249, 115, 22, 0.2) !important;
+  color: #FB923C !important;
+}
+
+/* Kompozycja hero – pomarańczowy pasek i tło logo w ciemnym */
+.dark main [data-theme="linux-desktop"] .instruction-hero-accent,
+.dark main [data-theme="linux-server"] .instruction-hero-accent {
+  background-color: #F97316 !important;
+}
+.dark main [data-theme="linux-desktop"] .instruction-hero-logo-wrap,
+.dark main [data-theme="linux-server"] .instruction-hero-logo-wrap {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+/* Hero Linux – pełne tło pomarańczowe (jasny i ciemny) */
+html:not(.dark) main [data-theme="linux-desktop"] .instruction-hero,
+html:not(.dark) main [data-theme="linux-server"] .instruction-hero,
+.dark main [data-theme="linux-desktop"] .instruction-hero,
+.dark main [data-theme="linux-server"] .instruction-hero {
+  background-color: #F97316 !important;
+  border-color: #EA580C !important;
+}
+.dark main [data-theme="linux-desktop"] .instruction-back-link,
+.dark main [data-theme="linux-server"] .instruction-back-link {
+  background-color: #F97316 !important;
+  border-color: rgba(255,255,255,0.25) !important;
+  color: #fff !important;
+}
+.dark main [data-theme="linux-desktop"] .instruction-back-link:hover,
+.dark main [data-theme="linux-server"] .instruction-back-link:hover {
+  background-color: #FB923C !important;
+}
+
 /* Underline links keep brand color */
 html:not(.dark) main .text-brand-400 { color: #0284c7; }
 html:not(.dark) main .text-brand-300 { color: #0369a1; }
@@ -139,6 +210,56 @@ html:not(.dark) main .home-hero-section a.bg-brand-600 {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ===== Homepage hero – tytuł „jedzie do przodu” i się stabilizuje ===== */
+@keyframes hero-title-in {
+  0% {
+    opacity: 0;
+    transform: translateZ(-280px) scale(0.72);
+    filter: blur(6px);
+  }
+  55% {
+    opacity: 1;
+    transform: translateZ(15px) scale(1.04);
+    filter: blur(0);
+  }
+  75% {
+    transform: translateZ(-5px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes hero-subtitle-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-buttons-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Delikatny „oddech” tła – jak żywe GIF */
+@keyframes hero-bg-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.92; }
+}
+
 /* ===== Homepage hero – animacje ===== */
 @keyframes home-gradient-shift {
   0%, 100% { background-position: 0% 50%; }
@@ -156,32 +277,58 @@ html:not(.dark) main .home-hero-section a.bg-brand-600 {
 
 .home-hero-bg {
   background-size: 300% 300%;
-  animation: home-gradient-shift 18s ease infinite;
+  animation: home-gradient-shift 20s ease-in-out infinite;
+}
+.home-hero-bg-breathe {
+  animation: hero-bg-breathe 8s ease-in-out infinite;
+}
+.home-hero-perspective {
+  perspective: 900px;
+  transform-style: preserve-3d;
+}
+.home-hero-title-in {
+  animation: hero-title-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+.home-hero-subtitle-in {
+  animation: hero-subtitle-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
+}
+.home-hero-buttons-in {
+  animation: hero-buttons-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.9s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-title-in {
+    animation: hero-subtitle-in 0.6s ease-out both;
+  }
+  .home-hero-bg-breathe {
+    animation: none;
+  }
 }
 .home-hero-float {
   animation: home-float 16s ease-in-out infinite;
   will-change: transform;
 }
 
-/* Beam – pozioma linia przelatująca przez ekran */
+/* Beam – pozioma linia przelatująca przez ekran (wolniej, bardziej jak GIF) */
 @keyframes home-beam {
   0%   { transform: translateX(-100%); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
+  12%  { opacity: 0.7; }
+  88%  { opacity: 0.7; }
   100% { transform: translateX(350%); opacity: 0; }
 }
 .home-hero-beam {
-  animation: home-beam 12s linear infinite;
+  animation: home-beam 16s linear infinite;
   will-change: transform;
 }
 
-/* Particles – drobne cząstki unoszące się w górę */
+/* Particles – drobne cząstki (wolniejszy, płynny ruch) */
 @keyframes home-particle {
   0%   { transform: translateY(0) scale(1); opacity: 0; }
-  15%  { opacity: 0.6; }
-  85%  { opacity: 0.3; }
-  100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+  20%  { opacity: 0.5; }
+  80%  { opacity: 0.25; }
+  100% { transform: translateY(-100px) scale(0.6); opacity: 0; }
 }
 .home-hero-particle {
-  animation: home-particle 10s ease-in-out infinite;
+  animation: home-particle 14s ease-in-out infinite;
 }

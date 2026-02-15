@@ -5,6 +5,7 @@ import { useToast } from '../context/useToast'
 import * as api from '../api/client'
 import { APP_VERSION } from '../config/version'
 import Skeleton from '../components/Skeleton'
+import Modal from '../components/Modal'
 
 export default function Konto() {
   const { isAuthenticated, user, logout } = useAuth()
@@ -12,6 +13,7 @@ export default function Konto() {
   const [me, setMe] = useState(null)
   const [meLoading, setMeLoading] = useState(true)
   const [changePwOpen, setChangePwOpen] = useState(false)
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false)
   const [oldPw, setOldPw] = useState('')
   const [newPw, setNewPw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
@@ -100,49 +102,80 @@ export default function Konto() {
         <div>
           <button
             type="button"
-            onClick={() => setChangePwOpen(!changePwOpen)}
+            onClick={() => setChangePwOpen(true)}
             className="px-5 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-200 active:scale-[0.98]"
+            aria-haspopup="dialog"
+            aria-expanded={changePwOpen}
           >
-            {changePwOpen ? 'Anuluj' : 'Zmień hasło'}
+            Zmień hasło
           </button>
         </div>
-        {changePwOpen && (
-          <form onSubmit={handleChangePassword} className="p-4 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/30 space-y-3">
-            {changePwError && <p className="text-red-400 text-sm">{changePwError}</p>}
-            {changePwSuccess && <p className="text-emerald-400 text-sm">Hasło zmienione.</p>}
-            <input
-              type="password"
-              placeholder="Obecne hasło"
-              value={oldPw}
-              onChange={(e) => setOldPw(e.target.value)}
-              required
-              className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-500"
-            />
-            <input
-              type="password"
-              placeholder="Nowe hasło (min. 8 zn.)"
-              value={newPw}
-              onChange={(e) => setNewPw(e.target.value)}
-              required
-              minLength={8}
-              className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-500"
-            />
-            <input
-              type="password"
-              placeholder="Powtórz nowe hasło"
-              value={confirmPw}
-              onChange={(e) => setConfirmPw(e.target.value)}
-              required
-              className="w-full px-4 py-2 rounded-lg bg-slate-800 border border-slate-600 text-white placeholder-slate-500"
-            />
-            <button type="submit" disabled={changePwLoading} className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white disabled:opacity-60">
-              {changePwLoading ? 'Zapisywanie…' : 'Zapisz'}
-            </button>
+        <Modal open={changePwOpen} onClose={() => { setChangePwOpen(false); setChangePwError(''); setChangePwSuccess(false) }} title="Zmień hasło" aria-label="Formularz zmiany hasła">
+          <form onSubmit={handleChangePassword} className="space-y-3">
+            {changePwError && <p className="text-red-400 text-sm" role="alert">{changePwError}</p>}
+            {changePwSuccess && <p className="text-emerald-400 text-sm" role="status">Hasło zmienione.</p>}
+            <label className="block">
+              <span className="sr-only">Obecne hasło</span>
+              <input
+                type="password"
+                placeholder="Obecne hasło"
+                value={oldPw}
+                onChange={(e) => setOldPw(e.target.value)}
+                required
+                autoComplete="current-password"
+                className="w-full px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+            </label>
+            <label className="block">
+              <span className="sr-only">Nowe hasło (min. 8 znaków)</span>
+              <input
+                type="password"
+                placeholder="Nowe hasło (min. 8 zn.)"
+                value={newPw}
+                onChange={(e) => setNewPw(e.target.value)}
+                required
+                minLength={8}
+                autoComplete="new-password"
+                className="w-full px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+            </label>
+            <label className="block">
+              <span className="sr-only">Powtórz nowe hasło</span>
+              <input
+                type="password"
+                placeholder="Powtórz nowe hasło"
+                value={confirmPw}
+                onChange={(e) => setConfirmPw(e.target.value)}
+                required
+                autoComplete="new-password"
+                className="w-full px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              />
+            </label>
+            <div className="flex gap-2 pt-2">
+              <button type="button" onClick={() => { setChangePwOpen(false); setChangePwError('') }} className="px-4 py-2 rounded-lg font-medium text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">
+                Anuluj
+              </button>
+              <button type="submit" disabled={changePwLoading} className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white disabled:opacity-60">
+                {changePwLoading ? 'Zapisywanie…' : 'Zapisz'}
+              </button>
+            </div>
           </form>
-        )}
+        </Modal>
+        <Modal open={logoutConfirmOpen} onClose={() => setLogoutConfirmOpen(false)} title="Wylogowanie" aria-label="Potwierdzenie wylogowania">
+          <p className="text-slate-600 dark:text-slate-300 mb-6">Czy na pewno chcesz się wylogować?</p>
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setLogoutConfirmOpen(false)} className="flex-1 px-4 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600">
+              Anuluj
+            </button>
+            <button type="button" onClick={() => { setLogoutConfirmOpen(false); logout() }} className="flex-1 px-4 py-2.5 rounded-lg font-medium text-white bg-red-600 hover:bg-red-500">
+              Wyloguj się
+            </button>
+          </div>
+        </Modal>
         <button
-          onClick={logout}
+          onClick={() => setLogoutConfirmOpen(true)}
           className="block px-5 py-2.5 rounded-lg font-medium text-slate-700 dark:text-slate-200 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all duration-200 active:scale-[0.98]"
+          aria-label="Wyloguj się z konta"
         >
           Wyloguj się
         </button>
